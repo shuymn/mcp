@@ -1,0 +1,18 @@
+# Lefthook configuration for MCP Go Monorepo
+# https://github.com/evilmartians/lefthook
+
+# Skip output sections for cleaner display
+skip_output:
+  - meta
+  - summary
+  - execution_info
+
+# Pre-commit hook configuration
+pre-commit:
+  commands:
+    fmt:
+      run: make fmt
+      fail_text: "Formatting failed. Run 'make fmt' to see detailed errors."
+    lint:
+      run: make lint
+      fail_text: "Linting failed. Run 'make lint' to see detailed errors."
