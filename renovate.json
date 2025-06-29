@@ -8,25 +8,28 @@
   "labels": [
     "dependencies"
   ],
-  "postUpdateOptions": [
-    "gomodTidy",
-    "gomodUpdateImportPaths"
-  ],
-  "gomod": {
-    "managerFilePatterns": [
-      "/^go\\.mod$/",
-      "/^go\\.tool\\.mod$/"
-    ]
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "major": {
+    "minimumReleaseAge": "5 days"
+  },
+  "minor": {
+    "minimumReleaseAge": "3 days"
+  },
+  "patch": {
+    "minimumReleaseAge": "2 days"
   },
   "customManagers": [
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/^\\.github/workflows/ci\\.yml$/"
+        "deno.json"
       ],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s+\\S+?: (?<currentValue>\\S+)"
-      ]
+        "\"(?<depName>@?[^\"]+)\":\\s*\"npm:(?<packageName>@?[^@]+)@(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "npm"
     }
   ]
 }

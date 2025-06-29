@@ -11,8 +11,11 @@ skip_output:
 pre-commit:
   commands:
     fmt:
-      run: make fmt
-      fail_text: "Formatting failed. Run 'make fmt' to see detailed errors."
+      run: deno task fmt:check
+      fail_text: "Formatting failed. Run 'deno task fmt:check' to see detailed errors."
     lint:
-      run: make lint
-      fail_text: "Linting failed. Run 'make lint' to see detailed errors."
+      run: deno task lint
+      fail_text: "Linting failed. Run 'deno task lint' to see detailed errors."
+    check:
+      run: deno check **/*.ts
+      fail_text: "Type checking failed. Run 'deno check **/*.ts' to see detailed errors."
