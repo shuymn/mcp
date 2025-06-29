@@ -201,7 +201,10 @@ const server = createToolsServer(
   },
 );
 
-await server.connect(new StdioServerTransport());
+// Only connect to server when not in test mode
+if (import.meta.main) {
+  await server.connect(new StdioServerTransport());
+}
 
 // ------------------- TESTS ↓ -------------------
 
