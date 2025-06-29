@@ -166,29 +166,17 @@ const server = createToolsServer(
         // Create the subprocess
         const command = new Deno.Command("gemini", {
           args: ["--prompt", params.prompt],
-          stdin: "piped",
           stdout: "piped",
           stderr: "piped",
           env: { ...Deno.env.toObject(), LANG: "en_US.UTF-8" },
         });
 
-        const process = command.spawn();
-
-        // Close stdin since we're passing everything via --prompt
-        const writer = process.stdin.getWriter();
-        await writer.close();
-
-        // Collect output
-        const output = await process.output();
-
-        const textDecoder = new TextDecoder();
-        const stdout = textDecoder.decode(output.stdout);
-        const stderr = textDecoder.decode(output.stderr);
+        const { code, stdout, stderr } = await command.output();
 
         return {
-          output: stdout,
-          exitCode: output.code,
-          error: stderr || undefined,
+          output: (new TextDecoder()).decode(stdout),
+          exitCode: code,
+          error: (new TextDecoder()).decode(stderr) || undefined,
         };
       } catch (error) {
         return {
