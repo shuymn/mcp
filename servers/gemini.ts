@@ -8,7 +8,8 @@ import { createToolsServer } from "../lib/tools-server.ts";
 import { Tool } from "../lib/type.ts";
 
 const SERVER_NAME = "gemini";
-const TOOL_NAME = "google-search";
+const TOOL_NAME_GOOGLE_SEARCH = "google-search";
+const TOOL_NAME_GEMINI_CLI = "gemini-cli";
 
 // Type definitions for grounding metadata
 interface GroundingSource {
@@ -94,13 +95,26 @@ function processGroundingResponse(
 
 const tools = [
   {
-    name: TOOL_NAME,
+    name: TOOL_NAME_GOOGLE_SEARCH,
     description:
       "Performs a web search using Google Search (via the Gemini API) and returns the results. This tool is useful for finding information on the internet based on a query.",
     inputSchema: {
       query: z.string().describe("The search query to find information on the web."),
     },
     outputSchema: z.string().describe("The search results with citations and sources"),
+  },
+  {
+    name: TOOL_NAME_GEMINI_CLI,
+    description:
+      "Execute the Gemini CLI command with a prompt. This tool launches the local Gemini CLI with your prompt and returns the response.",
+    inputSchema: {
+      prompt: z.string().describe("The prompt to send to Gemini CLI"),
+    },
+    outputSchema: z.object({
+      output: z.string().describe("The output from Gemini CLI"),
+      exitCode: z.number().describe("The exit code of the process"),
+      error: z.string().optional().describe("Any error output if present"),
+    }),
   },
 ] as const satisfies Tool[];
 
@@ -111,7 +125,7 @@ const server = createToolsServer(
   },
   tools,
   {
-    async [TOOL_NAME](params: { query: string }) {
+    async [TOOL_NAME_GOOGLE_SEARCH](params: { query: string }) {
       if (!params.query || params.query.trim() === "") {
         throw new Error("Search query cannot be empty");
       }
@@ -147,13 +161,47 @@ const server = createToolsServer(
         );
       }
     },
+    async [TOOL_NAME_GEMINI_CLI](params: { prompt: string }) {
+      try {
+        // Create the subprocess
+        const command = new Deno.Command("gemini", {
+          args: ["--prompt", params.prompt],
+          stdin: "piped",
+          stdout: "piped",
+          stderr: "piped",
+          env: { ...Deno.env.toObject(), LANG: "en_US.UTF-8" },
+        });
+
+        const process = command.spawn();
+
+        // Close stdin since we're passing everything via --prompt
+        const writer = process.stdin.getWriter();
+        await writer.close();
+
+        // Collect output
+        const output = await process.output();
+
+        const textDecoder = new TextDecoder();
+        const stdout = textDecoder.decode(output.stdout);
+        const stderr = textDecoder.decode(output.stderr);
+
+        return {
+          output: stdout,
+          exitCode: output.code,
+          error: stderr || undefined,
+        };
+      } catch (error) {
+        return {
+          output: "",
+          exitCode: 1,
+          error: error instanceof Error ? error.message : String(error),
+        };
+      }
+    },
   },
 );
 
-// Only connect to server when not in test mode
-if (import.meta.main) {
-  await server.connect(new StdioServerTransport());
-}
+await server.connect(new StdioServerTransport());
 
 // ------------------- TESTS ↓ -------------------
 
