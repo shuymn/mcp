@@ -47,17 +47,20 @@ const server = createToolsServer(
     async [TOOL_NAME](params: { query: string }) {
       const { text } = await generateText({
         model: openai.responses("o4-mini"),
-        prompt: params.query,
+        messages: [
+          {
+            role: "user",
+            content: params.query,
+          },
+        ],
         tools: {
-          web_search_preview: openai.tools.webSearchPreview({
-            searchContextSize: searchContextSize,
-          }),
+          web_search_preview: openai.tools.webSearchPreview({ searchContextSize }),
         },
         toolChoice: "auto",
         providerOptions: {
           openai: {
             parallelToolCalls: true,
-            reasoningEffort: reasoningEffort,
+            reasoningEffort,
           } satisfies OpenAIResponsesProviderOptions,
         },
       });
