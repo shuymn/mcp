@@ -31,6 +31,33 @@ AI-powered web search using OpenAI's o4-mini model.
 }
 ```
 
+### gemini
+
+Google Search integration using Gemini API with grounding support.
+
+```bash
+# Run directly
+./servers/gemini.ts
+
+# Or configure in Claude Desktop:
+{
+  "mcpServers": {
+    "gemini": {
+      "command": "/path/to/mcp/servers/gemini.ts",
+      "env": {
+        "GEMINI_API_KEY": "your-key"
+      }
+    }
+  }
+}
+```
+
+Features:
+- Uses Google's search grounding for up-to-date information
+- Automatically inserts inline citations in responses
+- Shows source URLs and search queries
+- Comprehensive test coverage
+
 ## Development
 
 ```bash
@@ -40,4 +67,4 @@ deno task lint     # Lint code
 
 ## Creating New Servers
 
-See `servers/o4-mini.ts` for the pattern. Use `lib/tools-server.ts` to create type-safe MCP servers with Zod validation.
+See `servers/o4-mini.ts` and `servers/gemini.ts` for examples. Use `lib/tools-server.ts` to create type-safe MCP servers with Zod validation.
