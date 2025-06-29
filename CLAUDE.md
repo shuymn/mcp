@@ -80,14 +80,19 @@ const server = createToolsServer(
 );
 ```
 
+## Development Best Practices
+
+1. **Functional Programming**: Prefer immutable transformations with map/filter/reduce over imperative loops
+2. **Type Guards**: Use type guards to ensure type safety without non-null assertions
+3. **Type Safety**: Leverage TypeScript's type system with const assertions and satisfies operators
+4. **Error Handling**: Use try-catch blocks and provide meaningful error messages
+
 ## Testing
 
-The Gemini server includes comprehensive unit tests demonstrating best practices:
-
 1. **In-file tests**: Tests can be written in the same file using `Deno.test`
-2. **Type guards**: Use type guards to ensure type safety without non-null assertions
-3. **Functional programming**: Prefer immutable transformations with map/filter/reduce
-4. **Test coverage**: Aim for comprehensive coverage including edge cases
+2. **Test organization**: Use subtests with `t.step` for better structure
+3. **Test coverage**: Aim for comprehensive coverage including edge cases
+4. **Assertions**: Use `jsr:@std/assert` for test assertions
 
 Run tests with:
 ```bash
