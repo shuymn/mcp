@@ -13,50 +13,49 @@ Personal MCP (Model Context Protocol) servers implemented in TypeScript/Deno.
 
 AI-powered web search using OpenAI's o4-mini model.
 
+**Environment Variables:**
+- `OPENAI_API_KEY` (required): Your OpenAI API key
+- `SEARCH_CONTEXT_SIZE` (optional): Controls search context size - `low`, `medium`, or `high` (default: `high`)
+- `REASONING_EFFORT` (optional): Controls reasoning effort - `low`, `medium`, or `high` (default: `high`)
+
+**Available Tools:**
+- `o4-mini-search`: An AI agent with advanced web search capabilities. Useful for finding latest information and troubleshooting errors. Supports natural language queries.
+  - Input: `query` (string) - Ask questions, search for information, or consult about complex problems in English
+  - Output: The search result as a string
+
 ```bash
 # Run directly (has shebang and executable permissions)
 ./servers/o4-mini.ts
-
-# Or configure in Claude Desktop:
-# ~/Library/Application Support/Claude/claude_desktop_config.json
-{
-  "mcpServers": {
-    "o4-mini": {
-      "command": "/path/to/mcp/servers/o4-mini.ts",
-      "env": {
-        "OPENAI_API_KEY": "your-key"
-      }
-    }
-  }
-}
 ```
 
 ### gemini
 
 Google Search integration using Gemini API with grounding support.
 
-```bash
-# Run directly
-./servers/gemini.ts
+**Environment Variables:**
+- `GEMINI_API_KEY` (required when not using Vertex AI): Your Google AI Studio API key
+- `GOOGLE_GENAI_USE_VERTEXAI` (optional): Set to `true` to use Vertex AI instead of Google AI Studio
+- `GOOGLE_CLOUD_PROJECT` (required when using Vertex AI): Your Google Cloud project ID
+- `GOOGLE_CLOUD_LOCATION` (optional): Google Cloud location for Vertex AI (default: `us-central1`)
 
-# Or configure in Claude Desktop:
-{
-  "mcpServers": {
-    "gemini": {
-      "command": "/path/to/mcp/servers/gemini.ts",
-      "env": {
-        "GEMINI_API_KEY": "your-key"
-      }
-    }
-  }
-}
-```
+**Available Tools:**
+- `google-search`: Performs a web search using Google Search (via the Gemini API) and returns the results
+  - Input: `query` (string) - The search query to find information on the web
+  - Output: Search results with inline citations and source URLs
+- `gemini-cli`: Execute the Gemini CLI command with a prompt
+  - Input: `prompt` (string) - The prompt to send to Gemini CLI
+  - Output: Object containing `output` (string), `exitCode` (number), and optional `error` (string)
 
-Features:
+**Features:**
 - Uses Google's search grounding for up-to-date information
 - Automatically inserts inline citations in responses
 - Shows source URLs and search queries
-- Comprehensive test coverage
+- Supports both Google AI Studio and Vertex AI
+
+```bash
+# Run directly
+./servers/gemini.ts
+```
 
 ## Development
 
