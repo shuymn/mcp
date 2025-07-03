@@ -1,6 +1,7 @@
 #!/usr/bin/env -S deno run --allow-net --allow-env --allow-run --env
 
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createVertex } from "@ai-sdk/google-vertex";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { generateText } from "ai";
 import { z } from "zod";
@@ -30,9 +31,27 @@ interface GroundingMetadata {
   searchEntryPoint?: unknown;
 }
 
-const google = createGoogleGenerativeAI({
-  apiKey: Deno.env.get("GEMINI_API_KEY") ?? "",
-});
+function createGoogle() {
+  const useVertexAI = Deno.env.get("GOOGLE_GENAI_USE_VERTEXAI") === "true";
+
+  if (useVertexAI) {
+    const project = Deno.env.get("GOOGLE_CLOUD_PROJECT");
+    if (!project) {
+      throw new Error("GOOGLE_CLOUD_PROJECT is not set");
+    }
+
+    return createVertex({
+      project,
+      location: Deno.env.get("GOOGLE_CLOUD_LOCATION") ?? "us-central1",
+    });
+  }
+
+  return createGoogleGenerativeAI({
+    apiKey: Deno.env.get("GEMINI_API_KEY") ?? "",
+  });
+}
+
+const google = createGoogle();
 
 // Type guard to check if a support has all required fields
 function isValidGroundingSupport(
