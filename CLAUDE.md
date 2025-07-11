@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Format code**: `deno task fmt`
 - **Check formatting**: `deno task fmt:check`
 - **Lint code**: `deno task lint`
-- **Run server**: `deno run --allow-read --allow-net --allow-env servers/o4-mini.ts`
+- **Run server**: `deno run --allow-read --allow-net --allow-env servers/openai.ts`
 - **Run tests**: `deno test --allow-env servers/gemini.ts`
 
 ### Git Hooks
@@ -37,12 +37,12 @@ The architecture uses a type-safe pattern for defining and implementing MCP tool
 
 ### Server Implementation Pattern
 
-Servers follow this pattern (see `servers/o4-mini.ts` and `servers/gemini.ts`):
+Servers follow this pattern (see `servers/openai.ts` and `servers/gemini.ts`):
 
 1. Define tools as const arrays satisfying the `Tool` type
 2. Use `createToolsServer()` with server info, tools array, and handler map
 3. Connect using appropriate transport (typically `StdioServerTransport`)
-4. Environment variables control server behavior (e.g., `SEARCH_CONTEXT_SIZE`, `REASONING_EFFORT`, `GEMINI_API_KEY`)
+4. Environment variables control server behavior (e.g., `OPENAI_MODEL`, `SEARCH_CONTEXT_SIZE`, `REASONING_EFFORT`, `GEMINI_API_KEY`)
 
 ### Key Dependencies
 
