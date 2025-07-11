@@ -15,12 +15,12 @@ AI-powered web search using OpenAI models.
 
 **Environment Variables:**
 - `OPENAI_API_KEY` (required): Your OpenAI API key
-- `OPENAI_MODEL` (optional): OpenAI model to use (default: `o4-mini`)
-- `SEARCH_CONTEXT_SIZE` (optional): Controls search context size - `low`, `medium`, or `high` (default: `high`)
-- `REASONING_EFFORT` (optional): Controls reasoning effort - `low`, `medium`, or `high` (default: `high`)
+- `OPENAI_MODEL` (optional): OpenAI model to use (default: `o3`)
+- `SEARCH_CONTEXT_SIZE` (optional): Controls search context size - `low`, `medium`, or `high` (default: `medium`)
+- `REASONING_EFFORT` (optional): Controls reasoning effort - `low`, `medium`, or `high` (default: `medium`)
 
 **Available Tools:**
-- `o4-mini-search`: An AI agent with advanced web search capabilities. Useful for finding latest information and troubleshooting errors. Supports natural language queries.
+- `openai-search`: An AI agent with advanced web search capabilities. Useful for finding latest information and troubleshooting errors. Supports natural language queries.
   - Input: `query` (string) - Ask questions, search for information, or consult about complex problems in English
   - Output: The search result as a string
 
