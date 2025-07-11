@@ -9,12 +9,13 @@ Personal MCP (Model Context Protocol) servers implemented in TypeScript/Deno.
 
 ## Available Servers
 
-### o4-mini
+### openai
 
-AI-powered web search using OpenAI's o4-mini model.
+AI-powered web search using OpenAI models.
 
 **Environment Variables:**
 - `OPENAI_API_KEY` (required): Your OpenAI API key
+- `OPENAI_MODEL` (optional): OpenAI model to use (default: `o4-mini`)
 - `SEARCH_CONTEXT_SIZE` (optional): Controls search context size - `low`, `medium`, or `high` (default: `high`)
 - `REASONING_EFFORT` (optional): Controls reasoning effort - `low`, `medium`, or `high` (default: `high`)
 
@@ -25,7 +26,7 @@ AI-powered web search using OpenAI's o4-mini model.
 
 ```bash
 # Run directly (has shebang and executable permissions)
-./servers/o4-mini.ts
+./servers/openai.ts
 ```
 
 ### gemini
@@ -66,4 +67,4 @@ deno task lint     # Lint code
 
 ## Creating New Servers
 
-See `servers/o4-mini.ts` and `servers/gemini.ts` for examples. Use `lib/tools-server.ts` to create type-safe MCP servers with Zod validation.
+See `servers/openai.ts` and `servers/gemini.ts` for examples. Use `lib/tools-server.ts` to create type-safe MCP servers with Zod validation.
