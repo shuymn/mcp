@@ -19,6 +19,10 @@ const reasoningEffort = (Deno.env.get("REASONING_EFFORT") ?? "medium") as
   | "medium"
   | "high";
 
+const maxTokens = Deno.env.get("OPENAI_MAX_TOKENS")
+  ? parseInt(Deno.env.get("OPENAI_MAX_TOKENS")!)
+  : undefined;
+
 const openai = createOpenAI({
   apiKey: Deno.env.get("OPENAI_API_KEY") ?? "",
 });
@@ -48,6 +52,7 @@ const server = createToolsServer(
       const { text } = await generateText({
         model: openai.responses(Deno.env.get("OPENAI_MODEL") ?? "o3"),
         experimental_continueSteps: true,
+        maxTokens,
         messages: [
           {
             role: "user",

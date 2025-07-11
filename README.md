@@ -16,6 +16,7 @@ AI-powered web search using OpenAI models.
 **Environment Variables:**
 - `OPENAI_API_KEY` (required): Your OpenAI API key
 - `OPENAI_MODEL` (optional): OpenAI model to use (default: `o3`)
+- `OPENAI_MAX_TOKENS` (optional): Maximum number of tokens for the response
 - `SEARCH_CONTEXT_SIZE` (optional): Controls search context size - `low`, `medium`, or `high` (default: `medium`)
 - `REASONING_EFFORT` (optional): Controls reasoning effort - `low`, `medium`, or `high` (default: `medium`)
 
