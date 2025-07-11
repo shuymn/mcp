@@ -7,17 +7,21 @@ import { z } from "zod";
 import { createToolsServer } from "../lib/tools-server.ts";
 import { Tool } from "../lib/type.ts";
 
-const SERVER_NAME = "o4-mini";
-const TOOL_NAME = "o4-mini-search";
+const SERVER_NAME = "openai";
+const TOOL_NAME = "openai-search";
 
-const searchContextSize = (Deno.env.get("SEARCH_CONTEXT_SIZE") ?? "high") as
+const searchContextSize = (Deno.env.get("SEARCH_CONTEXT_SIZE") ?? "medium") as
   | "low"
   | "medium"
   | "high";
-const reasoningEffort = (Deno.env.get("REASONING_EFFORT") ?? "high") as
+const reasoningEffort = (Deno.env.get("REASONING_EFFORT") ?? "medium") as
   | "low"
   | "medium"
   | "high";
+
+const maxTokens = Deno.env.get("OPENAI_MAX_TOKENS")
+  ? parseInt(Deno.env.get("OPENAI_MAX_TOKENS")!)
+  : undefined;
 
 const openai = createOpenAI({
   apiKey: Deno.env.get("OPENAI_API_KEY") ?? "",
@@ -27,7 +31,7 @@ const tools = [
   {
     name: TOOL_NAME,
     description:
-      "An AI agent with advanced web search capabilities. Useful for finding latest information and troubleshooting errors. Supports natural language queries.",
+      "An AI agent with advanced web search capabilities using OpenAI models. Useful for finding latest information and troubleshooting errors. Supports natural language queries.",
     inputSchema: {
       query: z.string().describe(
         "Ask questions, search for information, or consult about complex problems in English.",
@@ -46,7 +50,9 @@ const server = createToolsServer(
   {
     async [TOOL_NAME](params: { query: string }) {
       const { text } = await generateText({
-        model: openai.responses("o4-mini"),
+        model: openai.responses(Deno.env.get("OPENAI_MODEL") ?? "o3"),
+        experimental_continueSteps: true,
+        maxTokens,
         messages: [
           {
             role: "user",
