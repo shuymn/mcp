@@ -125,7 +125,7 @@ const tools = [
   {
     name: TOOL_NAME_GEMINI_CLI,
     description:
-      "Execute the Gemini CLI command with a prompt. This tool launches the local Gemini CLI with your prompt and returns the response.",
+      "Execute the Gemini CLI command with a prompt. This tool launches the local Gemini CLI with your prompt and returns the response. The Gemini CLI can read and analyze files, including text files, PDFs, images, and entire codebases within its 1M token context window.",
     inputSchema: {
       prompt: z.string().describe("The prompt to send to Gemini CLI"),
     },
