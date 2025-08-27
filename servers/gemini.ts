@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
 
-import { spawn } from "node:child_process";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createGoogleGenerativeAI, google } from "@ai-sdk/google";
 import { createVertex } from "@ai-sdk/google-vertex";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { generateText } from "ai";
+import { $ } from "bun";
 import { z } from "zod";
 import { env } from "../lib/env";
 import { createToolsServer } from "../lib/tools-server";
@@ -51,7 +51,7 @@ function createGoogle() {
   });
 }
 
-const google = createGoogle();
+const g = createGoogle();
 
 // Type guard to check if a support has all required fields
 function isValidGroundingSupport(support: GroundingSupport): support is GroundingSupport & {
@@ -142,7 +142,10 @@ const server = createToolsServer(
       try {
         // Generate text with Google Search grounding enabled
         const { text, providerMetadata, sources } = await generateText({
-          model: google("gemini-2.5-pro", { useSearchGrounding: true }),
+          model: g("gemini-2.5-pro"),
+          tools: {
+            google_search: google.tools.googleSearch({}),
+          },
           system: `You are a web search assistant. Follow these rules:
 
 1. **Use verifiable public information**
@@ -186,47 +189,26 @@ Keep responses factual, sourced, and honest about limitations.`,
       }
     },
     async [TOOL_NAME_GEMINI_CLI](params: { prompt: string }) {
-      try {
-        // Use Node.js child_process spawn instead of Deno.Command
-        return new Promise((resolve) => {
-          const geminiProcess = spawn("gemini", ["--prompt", params.prompt], {
-            env: { ...process.env, LANG: "en_US.UTF-8" },
-          });
-
-          let stdout = "";
-          let stderr = "";
-
-          geminiProcess.stdout?.on("data", (data) => {
-            stdout += data.toString();
-          });
-
-          geminiProcess.stderr?.on("data", (data) => {
-            stderr += data.toString();
-          });
-
-          geminiProcess.on("close", (code) => {
-            resolve({
-              output: stdout,
-              exitCode: code ?? 1,
-              error: stderr || undefined,
-            });
-          });
-
-          geminiProcess.on("error", (error) => {
-            resolve({
-              output: "",
-              exitCode: 1,
-              error: error.message,
-            });
-          });
+      const { stdout, stderr, exitCode } = await $`gemini --prompt "${params.prompt}"`
+        .nothrow()
+        .quiet()
+        .env({
+          ...process.env,
+          LANG: "en_US.UTF-8",
         });
-      } catch (error) {
+
+      if (exitCode !== 0) {
         return {
           output: "",
-          exitCode: 1,
-          error: error instanceof Error ? error.message : String(error),
+          exitCode,
+          error: stderr.toString(),
         };
       }
+
+      return {
+        output: stdout.toString(),
+        exitCode,
+      };
     },
   },
 );
