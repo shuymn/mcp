@@ -16,7 +16,7 @@ const schema = z.object({
 
   SEARCH_CONTEXT_SIZE: z.enum(["low", "medium", "high"]).default("medium"),
   REASONING_EFFORT: z.enum(["low", "medium", "high"]).default("medium"),
-  OPENAI_API_KEY: nonEmpty.default(""),
+  OPENAI_API_KEY: nonEmpty,
   OPENAI_MAX_TOKENS: z.coerce.number().int().positive().optional(),
 });
 

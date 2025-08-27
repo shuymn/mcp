@@ -27,4 +27,6 @@ jobs:
         run: bun run typecheck
 
       - name: Run tests
+        env:
+          OPENAI_API_KEY: dummy
         run: bun run test
