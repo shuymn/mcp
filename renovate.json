@@ -30,6 +30,16 @@
       "groupName": "AI SDK packages",
       "groupSlug": "ai-sdk",
       "separateMajorMinor": false
+    },
+    {
+      "description": "Group MCP SDK with zod to ensure they update together",
+      "matchPackageNames": [
+        "@modelcontextprotocol/sdk",
+        "zod"
+      ],
+      "groupName": "MCP SDK and dependencies",
+      "groupSlug": "mcp-sdk-deps",
+      "rangeStrategy": "auto"
     }
   ]
 }
