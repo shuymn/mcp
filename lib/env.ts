@@ -14,8 +14,9 @@ const schema = z.object({
   GOOGLE_CLOUD_LOCATION: nonEmpty.default("us-central1"),
   GEMINI_API_KEY: nonEmpty.optional(),
 
-  SEARCH_CONTEXT_SIZE: z.enum(["low", "medium", "high"]).default("medium"),
-  REASONING_EFFORT: z.enum(["low", "medium", "high"]).default("medium"),
+  SEARCH_CONTEXT_SIZE: z.enum(["low", "medium", "high"]).default("high"),
+  REASONING_EFFORT: z.enum(["low", "medium", "high"]).default("high"),
+  TEXT_VERBOSITY: z.enum(["low", "medium", "high"]).default("high"),
   OPENAI_API_KEY: nonEmpty,
   OPENAI_MAX_TOKENS: z.coerce.number().int().positive().optional(),
 });
