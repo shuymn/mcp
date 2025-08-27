@@ -19,17 +19,5 @@
   },
   "patch": {
     "minimumReleaseAge": "2 days"
-  },
-  "customManagers": [
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "deno.json"
-      ],
-      "matchStrings": [
-        "\"(?<depName>@?[^\"]+)\":\\s*\"npm:(?<packageName>@?[^@]+)@(?<currentValue>[^\"]+)\""
-      ],
-      "datasourceTemplate": "npm"
-    }
-  ]
+  }
 }

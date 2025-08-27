@@ -1,0 +1,176 @@
+import { expect, test } from "bun:test";
+
+import { type GroundingMetadata, type GroundingSource, processGroundingResponse } from "./gemini";
+
+test("processGroundingResponse", () => {
+  test("returns original text when no grounding metadata", () => {
+    const result = processGroundingResponse("Hello world", undefined, undefined);
+    expect(result).toBe("Hello world");
+  });
+
+  test("returns original text when no sources", () => {
+    const result = processGroundingResponse("Hello world", [], {
+      groundingSupports: [],
+    });
+    expect(result).toBe("Hello world");
+  });
+
+  test("appends sources list when sources available", () => {
+    const sources: GroundingSource[] = [
+      { title: "Example News", url: "https://example.com/article1" },
+      { title: "Another Story", url: "https://another.com/story" },
+    ];
+    const result = processGroundingResponse("Some text", sources, {
+      groundingSupports: [],
+    });
+    expect(result).toContain("[1] Example News (https://example.com/article1)");
+    expect(result).toContain("[2] Another Story (https://another.com/story)");
+    expect(result).toContain("Sources:");
+  });
+
+  test("inserts citations based on grounding supports", () => {
+    const sources: GroundingSource[] = [
+      { title: "Source 1", url: "https://url1.com" },
+      { title: "Source 2", url: "https://url2.com" },
+    ];
+    const groundingMetadata: GroundingMetadata = {
+      groundingSupports: [
+        {
+          segment: { endIndex: 10 },
+          groundingChunkIndices: [0],
+        },
+        {
+          segment: { endIndex: 25 },
+          groundingChunkIndices: [1],
+        },
+      ],
+    };
+    const result = processGroundingResponse("First part and second part of text", sources, groundingMetadata);
+    expect(result).toContain("[1]");
+    expect(result).toContain("[2]");
+  });
+
+  test("handles multiple citations at same position", () => {
+    const sources: GroundingSource[] = [
+      { title: "Source 1", url: "https://url1.com" },
+      { title: "Source 2", url: "https://url2.com" },
+      { title: "Source 3", url: "https://url3.com" },
+    ];
+    const groundingMetadata: GroundingMetadata = {
+      groundingSupports: [
+        {
+          segment: { endIndex: 15 },
+          groundingChunkIndices: [0, 2],
+        },
+      ],
+    };
+    const result = processGroundingResponse("This is a test sentence", sources, groundingMetadata);
+    expect(result).toContain("[1,3]");
+  });
+
+  test("appends search queries when available", () => {
+    const sources: GroundingSource[] = [{ title: "Result", url: "https://result.com" }];
+    const groundingMetadata: GroundingMetadata = {
+      groundingSupports: [],
+      webSearchQueries: ["latest AI news", "machine learning trends"],
+    };
+    const result = processGroundingResponse("Some response", sources, groundingMetadata);
+    expect(result).toContain("Searched for: latest AI news, machine learning trends");
+  });
+
+  test("handles out of bounds citation indices", () => {
+    const sources: GroundingSource[] = [{ title: "Source", url: "https://source.com" }];
+    const groundingMetadata: GroundingMetadata = {
+      groundingSupports: [
+        {
+          segment: { endIndex: 100 }, // Beyond text length
+          groundingChunkIndices: [0],
+        },
+      ],
+    };
+    const result = processGroundingResponse("Short text", sources, groundingMetadata);
+    // Should not throw and should still include sources
+    expect(result).toContain("[1] Source (https://source.com)");
+  });
+
+  test("preserves citation order when sorting", () => {
+    const sources: GroundingSource[] = [
+      { title: "A", url: "https://a.com" },
+      { title: "B", url: "https://b.com" },
+      { title: "C", url: "https://c.com" },
+    ];
+    const groundingMetadata: GroundingMetadata = {
+      groundingSupports: [
+        {
+          segment: { endIndex: 30 },
+          groundingChunkIndices: [2],
+        },
+        {
+          segment: { endIndex: 20 },
+          groundingChunkIndices: [1],
+        },
+        {
+          segment: { endIndex: 10 },
+          groundingChunkIndices: [0],
+        },
+      ],
+    };
+    const text = "First part second part third part end";
+    const result = processGroundingResponse(text, sources, groundingMetadata);
+
+    // Verify citations appear in correct positions
+    const firstCitation = result.indexOf("[1]");
+    const secondCitation = result.indexOf("[2]");
+    const thirdCitation = result.indexOf("[3]");
+
+    // Citations should appear in order based on their positions in text
+    expect(firstCitation < secondCitation).toBe(true);
+    expect(secondCitation < thirdCitation).toBe(true);
+  });
+
+  test("handles empty grounding supports array", () => {
+    const sources: GroundingSource[] = [{ title: "Source", url: "https://source.com" }];
+    const groundingMetadata: GroundingMetadata = {
+      groundingSupports: [],
+      webSearchQueries: ["test query"],
+    };
+    const result = processGroundingResponse("Text without citations", sources, groundingMetadata);
+    // Should include sources but no inline citations
+    expect(result).toContain("Sources:");
+    expect(result).toContain("[1] Source");
+    expect(result).toContain("Searched for: test query");
+    // Should not have inline citations
+    expect(result.startsWith("Text without citations\n\nSources:")).toBe(true);
+  });
+
+  test("handles missing segment or groundingChunkIndices", () => {
+    const sources: GroundingSource[] = [{ title: "Source", url: "https://source.com" }];
+    const groundingMetadata: GroundingMetadata = {
+      groundingSupports: [
+        {
+          // Missing segment
+          groundingChunkIndices: [0],
+        },
+        {
+          segment: { endIndex: 10 },
+          // Missing groundingChunkIndices
+        },
+        {
+          // Both present
+          segment: { endIndex: 20 },
+          groundingChunkIndices: [0],
+        },
+      ],
+    };
+    const result = processGroundingResponse("Text with partial metadata", sources, groundingMetadata);
+    // Should only process the valid support entry
+    expect(result).toContain("[1]");
+
+    // The issue is that `[1] Source` in the Sources section also matches the regex
+    // We need to count only inline citations, not those in the sources list
+    const sourcesSectionIndex = result.indexOf("\n\nSources:");
+    const textBeforeSources = result.substring(0, sourcesSectionIndex);
+    const inlineCitationCount = (textBeforeSources.match(/\[\d+\]/g) || []).length;
+    expect(inlineCitationCount).toBe(1); // Only one inline citation should be inserted
+  });
+});

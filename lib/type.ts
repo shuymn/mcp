@@ -1,5 +1,5 @@
-import { Tool as _Tool } from "@modelcontextprotocol/sdk/types.js";
-import { z } from "zod";
+import type { Tool as _Tool } from "@modelcontextprotocol/sdk/types.js";
+import type { z } from "zod";
 
 export type Tool = Required<Pick<_Tool, "name" | "description">> & {
   inputSchema: z.ZodRawShape;

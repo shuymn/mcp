@@ -1,19 +1,21 @@
-#!/usr/bin/env -S deno run --allow-net --allow-env --allow-run --env
+#!/usr/bin/env bun
 
+import { spawn } from "node:child_process";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createVertex } from "@ai-sdk/google-vertex";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { generateText } from "ai";
 import { z } from "zod";
-import { createToolsServer } from "../lib/tools-server.ts";
-import { Tool } from "../lib/type.ts";
+import { env } from "../lib/env";
+import { createToolsServer } from "../lib/tools-server";
+import type { Tool } from "../lib/type";
 
 const SERVER_NAME = "gemini";
 const TOOL_NAME_GOOGLE_SEARCH = "google-search";
 const TOOL_NAME_GEMINI_CLI = "gemini-cli";
 
 // Type definitions for grounding metadata
-interface GroundingSource {
+export interface GroundingSource {
   title: string;
   url: string;
 }
@@ -25,38 +27,34 @@ interface GroundingSupport {
   groundingChunkIndices?: number[];
 }
 
-interface GroundingMetadata {
+export interface GroundingMetadata {
   groundingSupports?: GroundingSupport[];
   webSearchQueries?: string[];
   searchEntryPoint?: unknown;
 }
 
 function createGoogle() {
-  const useVertexAI = Deno.env.get("GOOGLE_GENAI_USE_VERTEXAI") === "true";
-
-  if (useVertexAI) {
-    const project = Deno.env.get("GOOGLE_CLOUD_PROJECT");
+  if (env.GOOGLE_GENAI_USE_VERTEXAI) {
+    const project = env.GOOGLE_CLOUD_PROJECT;
     if (!project) {
       throw new Error("GOOGLE_CLOUD_PROJECT is not set");
     }
 
     return createVertex({
       project,
-      location: Deno.env.get("GOOGLE_CLOUD_LOCATION") ?? "us-central1",
+      location: env.GOOGLE_CLOUD_LOCATION,
     });
   }
 
   return createGoogleGenerativeAI({
-    apiKey: Deno.env.get("GEMINI_API_KEY") ?? "",
+    apiKey: env.GEMINI_API_KEY,
   });
 }
 
 const google = createGoogle();
 
 // Type guard to check if a support has all required fields
-function isValidGroundingSupport(
-  support: GroundingSupport,
-): support is GroundingSupport & {
+function isValidGroundingSupport(support: GroundingSupport): support is GroundingSupport & {
   segment: { endIndex?: number };
   groundingChunkIndices: number[];
 } {
@@ -64,7 +62,7 @@ function isValidGroundingSupport(
 }
 
 // Helper function to process grounding response and add citations
-function processGroundingResponse(
+export function processGroundingResponse(
   text: string,
   sources?: GroundingSource[],
   groundingMetadata?: GroundingMetadata,
@@ -80,36 +78,28 @@ function processGroundingResponse(
     .filter(isValidGroundingSupport)
     .map((support) => ({
       index: support.segment.endIndex || 0,
-      text: `[${
-        support.groundingChunkIndices
-          .map((idx) => idx + 1)
-          .sort((a, b) => a - b)
-          .join(",")
-      }]`,
+      text: `[${support.groundingChunkIndices
+        .map((idx) => idx + 1)
+        .sort((a, b) => a - b)
+        .join(",")}]`,
     }))
     .sort((a, b) => b.index - a.index);
 
   // Apply insertions to create final text with citations
   const textWithCitations = insertions
     .filter((insertion) => insertion.index <= text.length)
-    .reduce(
-      (acc, insertion) =>
-        acc.slice(0, insertion.index) + insertion.text + acc.slice(insertion.index),
-      text,
-    );
+    .reduce((acc, insertion) => acc.slice(0, insertion.index) + insertion.text + acc.slice(insertion.index), text);
 
   // Build source list
-  const sourceList = sources
-    .map((source, index) => `[${index + 1}] ${source.title} (${source.url})`)
-    .join("\n");
+  const sourceList = sources.map((source, index) => `[${index + 1}] ${source.title} (${source.url})`).join("\n");
 
   // Build search queries section if available
   const searchQueries = groundingMetadata.webSearchQueries?.length
-    ? "\n\nSearched for: " + groundingMetadata.webSearchQueries.join(", ")
+    ? `\n\nSearched for: ${groundingMetadata.webSearchQueries.join(", ")}`
     : "";
 
   // Compose final result
-  return textWithCitations + "\n\nSources:\n" + sourceList + searchQueries;
+  return `${textWithCitations}\n\nSources:\n${sourceList}${searchQueries}`;
 }
 
 const tools = [
@@ -177,9 +167,11 @@ Keep responses factual, sourced, and honest about limitations.`,
         });
 
         // Extract grounding metadata
-        const googleMetadata = providerMetadata?.google as {
-          groundingMetadata?: GroundingMetadata;
-        } | undefined;
+        const googleMetadata = providerMetadata?.google as
+          | {
+              groundingMetadata?: GroundingMetadata;
+            }
+          | undefined;
 
         // Process the response with citations and sources
         const processedText = processGroundingResponse(
@@ -190,28 +182,44 @@ Keep responses factual, sourced, and honest about limitations.`,
 
         return processedText || "No response from Gemini model";
       } catch (error) {
-        throw new Error(
-          `Google search failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-        );
+        throw new Error(`Google search failed: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     },
     async [TOOL_NAME_GEMINI_CLI](params: { prompt: string }) {
       try {
-        // Create the subprocess
-        const command = new Deno.Command("gemini", {
-          args: ["--prompt", params.prompt],
-          stdout: "piped",
-          stderr: "piped",
-          env: { ...Deno.env.toObject(), LANG: "en_US.UTF-8" },
+        // Use Node.js child_process spawn instead of Deno.Command
+        return new Promise((resolve) => {
+          const geminiProcess = spawn("gemini", ["--prompt", params.prompt], {
+            env: { ...process.env, LANG: "en_US.UTF-8" },
+          });
+
+          let stdout = "";
+          let stderr = "";
+
+          geminiProcess.stdout?.on("data", (data) => {
+            stdout += data.toString();
+          });
+
+          geminiProcess.stderr?.on("data", (data) => {
+            stderr += data.toString();
+          });
+
+          geminiProcess.on("close", (code) => {
+            resolve({
+              output: stdout,
+              exitCode: code ?? 1,
+              error: stderr || undefined,
+            });
+          });
+
+          geminiProcess.on("error", (error) => {
+            resolve({
+              output: "",
+              exitCode: 1,
+              error: error.message,
+            });
+          });
         });
-
-        const { code, stdout, stderr } = await command.output();
-
-        return {
-          output: (new TextDecoder()).decode(stdout),
-          exitCode: code,
-          error: (new TextDecoder()).decode(stderr) || undefined,
-        };
       } catch (error) {
         return {
           output: "",
@@ -224,223 +232,6 @@ Keep responses factual, sourced, and honest about limitations.`,
 );
 
 // Only connect to server when not in test mode
-if (import.meta.main) {
+if (import.meta.main !== false) {
   await server.connect(new StdioServerTransport());
 }
-
-// ------------------- TESTS ↓ -------------------
-
-import { assertEquals, assertStringIncludes } from "jsr:@std/assert";
-
-Deno.test("processGroundingResponse", async (t) => {
-  await t.step("returns original text when no grounding metadata", () => {
-    const result = processGroundingResponse(
-      "Hello world",
-      undefined,
-      undefined,
-    );
-    assertEquals(result, "Hello world");
-  });
-
-  await t.step("returns original text when no sources", () => {
-    const result = processGroundingResponse(
-      "Hello world",
-      [],
-      { groundingSupports: [] },
-    );
-    assertEquals(result, "Hello world");
-  });
-
-  await t.step("appends sources list when sources available", () => {
-    const sources: GroundingSource[] = [
-      { title: "Example News", url: "https://example.com/article1" },
-      { title: "Another Story", url: "https://another.com/story" },
-    ];
-    const result = processGroundingResponse(
-      "Some text",
-      sources,
-      { groundingSupports: [] },
-    );
-    assertStringIncludes(result, "[1] Example News (https://example.com/article1)");
-    assertStringIncludes(result, "[2] Another Story (https://another.com/story)");
-    assertStringIncludes(result, "Sources:");
-  });
-
-  await t.step("inserts citations based on grounding supports", () => {
-    const sources: GroundingSource[] = [
-      { title: "Source 1", url: "https://url1.com" },
-      { title: "Source 2", url: "https://url2.com" },
-    ];
-    const groundingMetadata: GroundingMetadata = {
-      groundingSupports: [
-        {
-          segment: { endIndex: 10 },
-          groundingChunkIndices: [0],
-        },
-        {
-          segment: { endIndex: 25 },
-          groundingChunkIndices: [1],
-        },
-      ],
-    };
-    const result = processGroundingResponse(
-      "First part and second part of text",
-      sources,
-      groundingMetadata,
-    );
-    assertStringIncludes(result, "[1]");
-    assertStringIncludes(result, "[2]");
-  });
-
-  await t.step("handles multiple citations at same position", () => {
-    const sources: GroundingSource[] = [
-      { title: "Source 1", url: "https://url1.com" },
-      { title: "Source 2", url: "https://url2.com" },
-      { title: "Source 3", url: "https://url3.com" },
-    ];
-    const groundingMetadata: GroundingMetadata = {
-      groundingSupports: [
-        {
-          segment: { endIndex: 15 },
-          groundingChunkIndices: [0, 2],
-        },
-      ],
-    };
-    const result = processGroundingResponse(
-      "This is a test sentence",
-      sources,
-      groundingMetadata,
-    );
-    assertStringIncludes(result, "[1,3]");
-  });
-
-  await t.step("appends search queries when available", () => {
-    const sources: GroundingSource[] = [
-      { title: "Result", url: "https://result.com" },
-    ];
-    const groundingMetadata: GroundingMetadata = {
-      groundingSupports: [],
-      webSearchQueries: ["latest AI news", "machine learning trends"],
-    };
-    const result = processGroundingResponse(
-      "Some response",
-      sources,
-      groundingMetadata,
-    );
-    assertStringIncludes(result, "Searched for: latest AI news, machine learning trends");
-  });
-
-  await t.step("handles out of bounds citation indices", () => {
-    const sources: GroundingSource[] = [
-      { title: "Source", url: "https://source.com" },
-    ];
-    const groundingMetadata: GroundingMetadata = {
-      groundingSupports: [
-        {
-          segment: { endIndex: 100 }, // Beyond text length
-          groundingChunkIndices: [0],
-        },
-      ],
-    };
-    const result = processGroundingResponse(
-      "Short text",
-      sources,
-      groundingMetadata,
-    );
-    // Should not throw and should still include sources
-    assertStringIncludes(result, "[1] Source (https://source.com)");
-  });
-
-  await t.step("preserves citation order when sorting", () => {
-    const sources: GroundingSource[] = [
-      { title: "A", url: "https://a.com" },
-      { title: "B", url: "https://b.com" },
-      { title: "C", url: "https://c.com" },
-    ];
-    const groundingMetadata: GroundingMetadata = {
-      groundingSupports: [
-        {
-          segment: { endIndex: 30 },
-          groundingChunkIndices: [2],
-        },
-        {
-          segment: { endIndex: 20 },
-          groundingChunkIndices: [1],
-        },
-        {
-          segment: { endIndex: 10 },
-          groundingChunkIndices: [0],
-        },
-      ],
-    };
-    const text = "First part second part third part end";
-    const result = processGroundingResponse(text, sources, groundingMetadata);
-
-    // Verify citations appear in correct positions
-    const firstCitation = result.indexOf("[1]");
-    const secondCitation = result.indexOf("[2]");
-    const thirdCitation = result.indexOf("[3]");
-
-    // Citations should appear in order based on their positions in text
-    assertEquals(firstCitation < secondCitation, true);
-    assertEquals(secondCitation < thirdCitation, true);
-  });
-
-  await t.step("handles empty grounding supports array", () => {
-    const sources: GroundingSource[] = [
-      { title: "Source", url: "https://source.com" },
-    ];
-    const groundingMetadata: GroundingMetadata = {
-      groundingSupports: [],
-      webSearchQueries: ["test query"],
-    };
-    const result = processGroundingResponse(
-      "Text without citations",
-      sources,
-      groundingMetadata,
-    );
-    // Should include sources but no inline citations
-    assertStringIncludes(result, "Sources:");
-    assertStringIncludes(result, "[1] Source");
-    assertStringIncludes(result, "Searched for: test query");
-    // Should not have inline citations
-    assertEquals(result.startsWith("Text without citations\n\nSources:"), true);
-  });
-
-  await t.step("handles missing segment or groundingChunkIndices", () => {
-    const sources: GroundingSource[] = [
-      { title: "Source", url: "https://source.com" },
-    ];
-    const groundingMetadata: GroundingMetadata = {
-      groundingSupports: [
-        {
-          // Missing segment
-          groundingChunkIndices: [0],
-        },
-        {
-          segment: { endIndex: 10 },
-          // Missing groundingChunkIndices
-        },
-        {
-          // Both present
-          segment: { endIndex: 20 },
-          groundingChunkIndices: [0],
-        },
-      ],
-    };
-    const result = processGroundingResponse(
-      "Text with partial metadata",
-      sources,
-      groundingMetadata,
-    );
-    // Should only process the valid support entry
-    assertStringIncludes(result, "[1]");
-
-    // The issue is that `[1] Source` in the Sources section also matches the regex
-    // We need to count only inline citations, not those in the sources list
-    const sourcesSectionIndex = result.indexOf("\n\nSources:");
-    const textBeforeSources = result.substring(0, sourcesSectionIndex);
-    const inlineCitationCount = (textBeforeSources.match(/\[\d+\]/g) || []).length;
-    assertEquals(inlineCitationCount, 1); // Only one inline citation should be inserted
-  });
-});

@@ -1,21 +1,12 @@
-# Lefthook configuration for MCP Go Monorepo
-# https://github.com/evilmartians/lefthook
-
-# Skip output sections for cleaner display
-skip_output:
-  - meta
-  - summary
-  - execution_info
-
-# Pre-commit hook configuration
-pre-commit:
+commit-msg:
   commands:
-    fmt:
-      run: deno task fmt:check
-      fail_text: "Formatting failed. Run 'deno task fmt:check' to see detailed errors."
-    lint:
-      run: deno task lint
-      fail_text: "Linting failed. Run 'deno task lint' to see detailed errors."
+    commitlint:
+      run: bunx commitlint --edit {1}
+
+pre-commit:
+  parallel: true
+  commands:
     check:
-      run: deno check **/*.ts
-      fail_text: "Type checking failed. Run 'deno check **/*.ts' to see detailed errors."
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+      run: bunx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+      stage_fixed: true

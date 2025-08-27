@@ -1,30 +1,18 @@
-#!/usr/bin/env -S deno run --allow-net --allow-env --allow-run --env
+#!/usr/bin/env bun
 
-import { createOpenAI, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
+import { createOpenAI, type OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { generateText } from "ai";
 import { z } from "zod";
-import { createToolsServer } from "../lib/tools-server.ts";
-import { Tool } from "../lib/type.ts";
+import { env } from "../lib/env";
+import { createToolsServer } from "../lib/tools-server";
+import type { Tool } from "../lib/type";
 
 const SERVER_NAME = "openai";
 const TOOL_NAME = "openai-search";
 
-const searchContextSize = (Deno.env.get("SEARCH_CONTEXT_SIZE") ?? "medium") as
-  | "low"
-  | "medium"
-  | "high";
-const reasoningEffort = (Deno.env.get("REASONING_EFFORT") ?? "medium") as
-  | "low"
-  | "medium"
-  | "high";
-
-const maxTokens = Deno.env.get("OPENAI_MAX_TOKENS")
-  ? parseInt(Deno.env.get("OPENAI_MAX_TOKENS")!)
-  : undefined;
-
 const openai = createOpenAI({
-  apiKey: Deno.env.get("OPENAI_API_KEY") ?? "",
+  apiKey: env.OPENAI_API_KEY,
 });
 
 const tools = [
@@ -33,9 +21,9 @@ const tools = [
     description:
       "An AI agent with advanced web search capabilities using OpenAI models. Useful for finding latest information and troubleshooting errors. Supports natural language queries.",
     inputSchema: {
-      query: z.string().describe(
-        "Ask questions, search for information, or consult about complex problems in English.",
-      ),
+      query: z
+        .string()
+        .describe("Ask questions, search for information, or consult about complex problems in English."),
     },
     outputSchema: z.string().describe("The search result"),
   },
@@ -50,9 +38,9 @@ const server = createToolsServer(
   {
     async [TOOL_NAME](params: { query: string }) {
       const { text } = await generateText({
-        model: openai.responses(Deno.env.get("OPENAI_MODEL") ?? "o3"),
+        model: openai.responses("o3"),
         experimental_continueSteps: true,
-        maxTokens,
+        maxTokens: env.OPENAI_MAX_TOKENS,
         system: `You are a web search assistant. Follow these rules:
 
 1. **Use verifiable public information**
@@ -75,13 +63,15 @@ Keep responses factual, sourced, and honest about limitations.`,
           },
         ],
         tools: {
-          web_search_preview: openai.tools.webSearchPreview({ searchContextSize }),
+          web_search_preview: openai.tools.webSearchPreview({
+            searchContextSize: env.SEARCH_CONTEXT_SIZE,
+          }),
         },
         toolChoice: "auto",
         providerOptions: {
           openai: {
             parallelToolCalls: true,
-            reasoningEffort,
+            reasoningEffort: env.REASONING_EFFORT,
           } satisfies OpenAIResponsesProviderOptions,
         },
       });

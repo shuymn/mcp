@@ -1,0 +1,9 @@
+# Bun configuration file
+
+[test]
+# Test configuration
+root = "./servers"
+
+[run]
+# Runtime configuration
+bun = true
