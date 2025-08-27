@@ -5,18 +5,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ### Core Development Tasks
-- **Format code**: `deno task fmt`
-- **Check formatting**: `deno task fmt:check`
-- **Lint code**: `deno task lint`
-- **Run server**: `deno run --allow-read --allow-net --allow-env servers/openai.ts`
-- **Run tests**: `deno test --allow-env servers/gemini.ts`
+- **Run checks**: `bun run check` - Run biome checks (format + lint)
+- **Fix issues**: `bun run check:fix` - Auto-fix biome issues (format + lint)
+- **Type check**: `bun run typecheck` - Type check with TypeScript
+- **Run tests**: `bun run test` - Run all tests
+- **Run OpenAI server**: `bun run servers/openai.ts`
+- **Run Gemini server**: `bun run servers/gemini.ts`
 
 ### Git Hooks
 The project uses Lefthook for pre-commit hooks that automatically run formatting and linting checks. These are configured in `lefthook.yml`.
 
 ## Architecture Overview
 
-This is a Model Context Protocol (MCP) implementation in TypeScript/Deno that provides a framework for creating MCP servers with AI tool integrations.
+This is a Model Context Protocol (MCP) implementation in TypeScript/Bun that provides a framework for creating MCP servers with AI tool integrations.
 
 ### Core Library Pattern (`lib/`)
 
@@ -89,12 +90,12 @@ const server = createToolsServer(
 
 ## Testing
 
-1. **In-file tests**: Tests can be written in the same file using `Deno.test`
-2. **Test organization**: Use subtests with `t.step` for better structure
+1. **Test files**: Tests are in separate `.test.ts` files alongside implementations
+2. **Test framework**: Uses Bun's built-in test runner
 3. **Test coverage**: Aim for comprehensive coverage including edge cases
-4. **Assertions**: Use `jsr:@std/assert` for test assertions
+4. **Assertions**: Use Bun's built-in assertions
 
 Run tests with:
 ```bash
-deno test --allow-env servers/gemini.ts
+bun test
 ```

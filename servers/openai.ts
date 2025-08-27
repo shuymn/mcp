@@ -1,30 +1,22 @@
-#!/usr/bin/env -S deno run --allow-net --allow-env --allow-run --env
+#!/usr/bin/env bun
 
-import { createOpenAI, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
+import { createOpenAI, type OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { generateText } from "ai";
 import { z } from "zod";
-import { createToolsServer } from "../lib/tools-server.ts";
-import { Tool } from "../lib/type.ts";
+import { createToolsServer } from "../lib/tools-server";
+import type { Tool } from "../lib/type";
 
 const SERVER_NAME = "openai";
 const TOOL_NAME = "openai-search";
 
-const searchContextSize = (Deno.env.get("SEARCH_CONTEXT_SIZE") ?? "medium") as
-  | "low"
-  | "medium"
-  | "high";
-const reasoningEffort = (Deno.env.get("REASONING_EFFORT") ?? "medium") as
-  | "low"
-  | "medium"
-  | "high";
+const searchContextSize = (process.env.SEARCH_CONTEXT_SIZE ?? "medium") as "low" | "medium" | "high";
+const reasoningEffort = (process.env.REASONING_EFFORT ?? "medium") as "low" | "medium" | "high";
 
-const maxTokens = Deno.env.get("OPENAI_MAX_TOKENS")
-  ? parseInt(Deno.env.get("OPENAI_MAX_TOKENS")!)
-  : undefined;
+const maxTokens = process.env.OPENAI_MAX_TOKENS ? Number.parseInt(process.env.OPENAI_MAX_TOKENS, 10) : undefined;
 
 const openai = createOpenAI({
-  apiKey: Deno.env.get("OPENAI_API_KEY") ?? "",
+  apiKey: process.env.OPENAI_API_KEY ?? "",
 });
 
 const tools = [
@@ -33,9 +25,9 @@ const tools = [
     description:
       "An AI agent with advanced web search capabilities using OpenAI models. Useful for finding latest information and troubleshooting errors. Supports natural language queries.",
     inputSchema: {
-      query: z.string().describe(
-        "Ask questions, search for information, or consult about complex problems in English.",
-      ),
+      query: z
+        .string()
+        .describe("Ask questions, search for information, or consult about complex problems in English."),
     },
     outputSchema: z.string().describe("The search result"),
   },
@@ -50,7 +42,7 @@ const server = createToolsServer(
   {
     async [TOOL_NAME](params: { query: string }) {
       const { text } = await generateText({
-        model: openai.responses(Deno.env.get("OPENAI_MODEL") ?? "o3"),
+        model: openai.responses(process.env.OPENAI_MODEL ?? "o3"),
         experimental_continueSteps: true,
         maxTokens,
         system: `You are a web search assistant. Follow these rules:
@@ -75,7 +67,9 @@ Keep responses factual, sourced, and honest about limitations.`,
           },
         ],
         tools: {
-          web_search_preview: openai.tools.webSearchPreview({ searchContextSize }),
+          web_search_preview: openai.tools.webSearchPreview({
+            searchContextSize,
+          }),
         },
         toolChoice: "auto",
         providerOptions: {

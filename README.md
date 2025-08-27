@@ -1,11 +1,12 @@
 # MCP TypeScript Servers
 
-Personal MCP (Model Context Protocol) servers implemented in TypeScript/Deno.
+Personal MCP (Model Context Protocol) servers implemented in TypeScript/Bun.
 
 ## Setup
 
-1. Install [Deno](https://deno.land/)
-2. Set environment variables (e.g., `OPENAI_API_KEY`)
+1. Install [Bun](https://bun.sh/)
+2. Install dependencies: `bun install`
+3. Set environment variables (e.g., `OPENAI_API_KEY`)
 
 ## Available Servers
 
@@ -26,7 +27,10 @@ AI-powered web search using OpenAI models.
   - Output: The search result as a string
 
 ```bash
-# Run directly (has shebang and executable permissions)
+# Run with Bun
+bun run servers/openai.ts
+
+# Or run directly (has shebang and executable permissions)
 ./servers/openai.ts
 ```
 
@@ -55,17 +59,30 @@ Google Search integration using Gemini API with grounding support.
 - Supports both Google AI Studio and Vertex AI
 
 ```bash
-# Run directly
+# Run with Bun
+bun run servers/gemini.ts
+
+# Or run directly (has shebang and executable permissions)
 ./servers/gemini.ts
 ```
 
 ## Development
 
 ```bash
-deno task fmt      # Format code
-deno task lint     # Lint code
+bun run check      # Run biome checks (format + lint)
+bun run check:fix  # Fix biome issues (format + lint)
+bun run typecheck  # Type check with TypeScript
+bun run test       # Run tests
 ```
 
 ## Creating New Servers
 
 See `servers/openai.ts` and `servers/gemini.ts` for examples. Use `lib/tools-server.ts` to create type-safe MCP servers with Zod validation.
+
+## Testing
+
+Tests are located in separate `.test.ts` files alongside the server implementations. Run tests with:
+
+```bash
+bun test
+```
