@@ -4,19 +4,15 @@ import { createOpenAI, type OpenAIResponsesProviderOptions } from "@ai-sdk/opena
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { generateText } from "ai";
 import { z } from "zod";
+import { env } from "../lib/env";
 import { createToolsServer } from "../lib/tools-server";
 import type { Tool } from "../lib/type";
 
 const SERVER_NAME = "openai";
 const TOOL_NAME = "openai-search";
 
-const searchContextSize = (process.env.SEARCH_CONTEXT_SIZE ?? "medium") as "low" | "medium" | "high";
-const reasoningEffort = (process.env.REASONING_EFFORT ?? "medium") as "low" | "medium" | "high";
-
-const maxTokens = process.env.OPENAI_MAX_TOKENS ? Number.parseInt(process.env.OPENAI_MAX_TOKENS, 10) : undefined;
-
 const openai = createOpenAI({
-  apiKey: process.env.OPENAI_API_KEY ?? "",
+  apiKey: env.OPENAI_API_KEY,
 });
 
 const tools = [
@@ -42,9 +38,9 @@ const server = createToolsServer(
   {
     async [TOOL_NAME](params: { query: string }) {
       const { text } = await generateText({
-        model: openai.responses(process.env.OPENAI_MODEL ?? "o3"),
+        model: openai.responses("o3"),
         experimental_continueSteps: true,
-        maxTokens,
+        maxTokens: env.OPENAI_MAX_TOKENS,
         system: `You are a web search assistant. Follow these rules:
 
 1. **Use verifiable public information**
@@ -68,14 +64,14 @@ Keep responses factual, sourced, and honest about limitations.`,
         ],
         tools: {
           web_search_preview: openai.tools.webSearchPreview({
-            searchContextSize,
+            searchContextSize: env.SEARCH_CONTEXT_SIZE,
           }),
         },
         toolChoice: "auto",
         providerOptions: {
           openai: {
             parallelToolCalls: true,
-            reasoningEffort,
+            reasoningEffort: env.REASONING_EFFORT,
           } satisfies OpenAIResponsesProviderOptions,
         },
       });

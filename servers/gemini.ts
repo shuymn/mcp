@@ -6,6 +6,7 @@ import { createVertex } from "@ai-sdk/google-vertex";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { generateText } from "ai";
 import { z } from "zod";
+import { env } from "../lib/env";
 import { createToolsServer } from "../lib/tools-server";
 import type { Tool } from "../lib/type";
 
@@ -33,22 +34,20 @@ export interface GroundingMetadata {
 }
 
 function createGoogle() {
-  const useVertexAI = process.env.GOOGLE_GENAI_USE_VERTEXAI === "true";
-
-  if (useVertexAI) {
-    const project = process.env.GOOGLE_CLOUD_PROJECT;
+  if (env.GOOGLE_GENAI_USE_VERTEXAI) {
+    const project = env.GOOGLE_CLOUD_PROJECT;
     if (!project) {
       throw new Error("GOOGLE_CLOUD_PROJECT is not set");
     }
 
     return createVertex({
       project,
-      location: process.env.GOOGLE_CLOUD_LOCATION ?? "us-central1",
+      location: env.GOOGLE_CLOUD_LOCATION,
     });
   }
 
   return createGoogleGenerativeAI({
-    apiKey: process.env.GEMINI_API_KEY ?? "",
+    apiKey: env.GEMINI_API_KEY,
   });
 }
 
