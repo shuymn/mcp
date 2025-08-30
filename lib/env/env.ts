@@ -7,14 +7,12 @@ const baseSchema = z.object({
 });
 
 export const createEnv = <T extends z.ZodRawShape>(schema: z.ZodObject<T>): z.infer<z.ZodObject<T>> => {
-  return (() => {
-    const mergedSchema = baseSchema.merge(schema);
-    const parsed = mergedSchema.safeParse(process.env);
-    if (!parsed.success) {
-      const details = parsed.error.issues.map((iss) => `  - ${iss.path.join(".")}: ${iss.message}`).join("\n");
-      console.error(`[env] Invalid environment variables:\n${details}`);
-      process.exit(1);
-    }
-    return parsed.data;
-  })();
+  const mergedSchema = baseSchema.merge(schema);
+  const parsed = mergedSchema.safeParse(process.env);
+  if (!parsed.success) {
+    const details = parsed.error.issues.map((iss) => `  - ${iss.path.join(".")}: ${iss.message}`).join("\n");
+    console.error(`[env] Invalid environment variables:\n${details}`);
+    process.exit(1);
+  }
+  return parsed.data;
 };
