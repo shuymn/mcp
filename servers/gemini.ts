@@ -5,7 +5,7 @@ import { createVertex } from "@ai-sdk/google-vertex";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { generateText } from "ai";
 import { z } from "zod";
-import { env } from "../lib/env";
+import { env } from "../lib/env/gemini";
 import { createToolsServer } from "../lib/tools-server";
 import type { Tool, ToolContext } from "../lib/type";
 
