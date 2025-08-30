@@ -6,7 +6,7 @@ import { generateText } from "ai";
 import { z } from "zod";
 import { env } from "../lib/env";
 import { createToolsServer } from "../lib/tools-server";
-import type { Tool } from "../lib/type";
+import type { Tool, ToolContext } from "../lib/type";
 
 const SERVER_NAME = "openai";
 const TOOL_NAME = "openai-search";
@@ -36,10 +36,11 @@ const server = createToolsServer(
   },
   tools,
   {
-    async [TOOL_NAME](params: { query: string }) {
+    async [TOOL_NAME](params: { query: string }, context?: ToolContext) {
       const { text } = await generateText({
         model: openai("gpt-5"),
         maxOutputTokens: env.OPENAI_MAX_TOKENS,
+        abortSignal: context?.signal, // Propagate timeout/cancellation from tools-server via AbortSignal
         system: `# Role and Objective
 - Assist users by providing factual, web-sourced information with transparent sourcing, and clarify information limitations.
 
@@ -85,6 +86,7 @@ const server = createToolsServer(
       return text;
     },
   },
+  { defaultTimeout: env.OPENAI_MCP_TIMEOUT },
 );
 
 // Only connect to server when not in test mode

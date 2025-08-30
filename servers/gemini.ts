@@ -4,11 +4,10 @@ import { createGoogleGenerativeAI, google } from "@ai-sdk/google";
 import { createVertex } from "@ai-sdk/google-vertex";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { generateText } from "ai";
-import { $ } from "bun";
 import { z } from "zod";
 import { env } from "../lib/env";
 import { createToolsServer } from "../lib/tools-server";
-import type { Tool } from "../lib/type";
+import type { Tool, ToolContext } from "../lib/type";
 
 const SERVER_NAME = "gemini";
 const TOOL_NAME_GOOGLE_SEARCH = "google-search";
@@ -134,7 +133,7 @@ const server = createToolsServer(
   },
   tools,
   {
-    async [TOOL_NAME_GOOGLE_SEARCH](params: { query: string }) {
+    async [TOOL_NAME_GOOGLE_SEARCH](params: { query: string }, context?: ToolContext) {
       if (!params.query || params.query.trim() === "") {
         throw new Error("Search query cannot be empty");
       }
@@ -143,6 +142,7 @@ const server = createToolsServer(
         // Generate text with Google Search grounding enabled
         const { text, providerMetadata, sources } = await generateText({
           model: g("gemini-2.5-pro"),
+          abortSignal: context?.signal, // Propagate timeout/cancellation from tools-server via AbortSignal
           tools: {
             google_search: google.tools.googleSearch({}),
           },
@@ -188,29 +188,42 @@ Keep responses factual, sourced, and honest about limitations.`,
         throw new Error(`Google search failed: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     },
-    async [TOOL_NAME_GEMINI_CLI](params: { prompt: string }) {
-      const { stdout, stderr, exitCode } = await $`gemini --prompt "${params.prompt}"`
-        .nothrow()
-        .quiet()
-        .env({
+    async [TOOL_NAME_GEMINI_CLI](params: { prompt: string }, context?: ToolContext) {
+      const proc = Bun.spawn({
+        cmd: ["gemini", "--prompt", params.prompt],
+        stdout: "pipe",
+        stderr: "pipe",
+        env: {
           ...process.env,
           LANG: "en_US.UTF-8",
-        });
+        },
+        // Allow tools-server to cancel the subprocess on timeout
+        signal: context?.signal,
+      });
+
+      const stdoutPromise = proc.stdout ? new Response(proc.stdout).text() : Promise.resolve("");
+      const stderrPromise = proc.stderr ? new Response(proc.stderr).text() : Promise.resolve("");
+
+      const [stdout, stderr] = await Promise.all([stdoutPromise, stderrPromise]);
+
+      // In rare cases, awaiting exited can throw; fall back to current exitCode
+      const exitCode = await proc.exited.catch(() => proc.exitCode ?? 1);
 
       if (exitCode !== 0) {
         return {
           output: "",
           exitCode,
-          error: stderr.toString(),
+          error: stderr,
         };
       }
 
       return {
-        output: stdout.toString(),
+        output: stdout,
         exitCode,
       };
     },
   },
+  { defaultTimeout: env.GEMINI_MCP_TIMEOUT },
 );
 
 // Only connect to server when not in test mode

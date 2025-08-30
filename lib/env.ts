@@ -13,12 +13,22 @@ const schema = z.object({
   GOOGLE_CLOUD_PROJECT: nonEmpty.optional(),
   GOOGLE_CLOUD_LOCATION: nonEmpty.default("us-central1"),
   GEMINI_API_KEY: nonEmpty.optional(),
+  GEMINI_MCP_TIMEOUT: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(10 * 60 * 1000), // 10 minutes
 
   SEARCH_CONTEXT_SIZE: z.enum(["low", "medium", "high"]).default("high"),
   REASONING_EFFORT: z.enum(["low", "medium", "high"]).default("high"),
   TEXT_VERBOSITY: z.enum(["low", "medium", "high"]).default("high"),
   OPENAI_API_KEY: nonEmpty,
   OPENAI_MAX_TOKENS: z.coerce.number().int().positive().optional(),
+  OPENAI_MCP_TIMEOUT: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(10 * 60 * 1000), // 10 minutes
 });
 
 type Env = z.infer<typeof schema>;
