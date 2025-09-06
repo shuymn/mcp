@@ -1,45 +1,38 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended",
     "config:best-practices",
-    ":timezone(Asia/Tokyo)"
+    ":timezone(Asia/Tokyo)",
+    "schedule:weekends"
   ],
-  "labels": [
-    "dependencies"
-  ],
+  "labels": ["dependencies"],
   "lockFileMaintenance": {
-    "enabled": true
+    "enabled": true,
+    "automerge": true
   },
-  "major": {
-    "minimumReleaseAge": "5 days"
-  },
-  "minor": {
-    "minimumReleaseAge": "3 days"
-  },
-  "patch": {
-    "minimumReleaseAge": "2 days"
-  },
+  "prHourlyLimit": 0,
+  "minimumReleaseAge": "3 days",
+  "internalChecksAsSuccess": true,
+  "reviewersFromCodeOwners": true,
+  "assignAutomerge": true,
   "packageRules": [
     {
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchCurrentVersion": ">=1.0.0",
+      "automerge": true
+    },
+    {
       "description": "Group all AI SDK packages together",
-      "matchPackageNames": [
-        "ai",
-        "/^@ai-sdk\\/.+$/"
-      ],
+      "matchPackageNames": ["ai", "/^@ai-sdk\\/.+$/"],
       "groupName": "AI SDK packages",
       "groupSlug": "ai-sdk",
       "separateMajorMinor": false
     },
     {
-      "description": "Group MCP SDK with zod to ensure they update together",
-      "matchPackageNames": [
-        "@modelcontextprotocol/sdk",
-        "zod"
-      ],
-      "groupName": "MCP SDK and dependencies",
-      "groupSlug": "mcp-sdk-deps",
-      "rangeStrategy": "auto"
+      "matchManagers": ["npm"],
+      "matchPackageNames": ["zod"],
+      "matchUpdateTypes": ["major"],
+      "prCreation": "status-success"
     }
   ]
 }
