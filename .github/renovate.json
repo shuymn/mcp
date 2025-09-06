@@ -29,7 +29,7 @@
       "separateMajorMinor": false
     },
     {
-      "matchManagers": ["npm"],
+      "matchManagers": ["bun"],
       "matchPackageNames": ["zod"],
       "matchUpdateTypes": ["major"],
       "prCreation": "status-success"
