@@ -29,8 +29,8 @@
       "separateMajorMinor": false
     },
     {
-      "matchManagers": ["bun"],
-      "matchPackageNames": ["zod"],
+      "matchDatasources": ["npm"],
+      "matchDepNames": ["zod"],
       "matchUpdateTypes": ["major"],
       "prCreation": "status-success"
     }
