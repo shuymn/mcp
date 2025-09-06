@@ -8,7 +8,7 @@
         "@ai-sdk/google-vertex": "3.0.16",
         "@ai-sdk/openai": "2.0.23",
         "@modelcontextprotocol/sdk": "1.17.4",
-        "ai": "5.0.28",
+        "ai": "5.0.30",
         "zod": "3.25.76",
       },
       "devDependencies": {
@@ -115,7 +115,7 @@
 
     "agent-base": ["agent-base@7.1.4", "", {}, "sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ=="],
 
-    "ai": ["ai@5.0.28", "", { "dependencies": { "@ai-sdk/gateway": "1.0.15", "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.7", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4" } }, "sha512-tnybAqoDFzuK6O1NOMHX1d/wH7Eug8y0H4l/Gl6swi8BYGtlTPDjniKnGYzgTpLTdpj7SI3qjZuomz7evph9+w=="],
+    "ai": ["ai@5.0.30", "", { "dependencies": { "@ai-sdk/gateway": "1.0.15", "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.7", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4" } }, "sha512-u7WdsDde9BasP+h8Q64CtU32GFShCYmxVtBa2h5dxM1f0w/AMKwzpmIDI1t3M3ean+L6uBiwOtRs8B2KA+OHgQ=="],
 
     "ajv": ["ajv@6.12.6", "", { "dependencies": { "fast-deep-equal": "^3.1.1", "fast-json-stable-stringify": "^2.0.0", "json-schema-traverse": "^0.4.1", "uri-js": "^4.2.2" } }, "sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g=="],
 
