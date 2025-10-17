@@ -21,7 +21,7 @@
     "@biomejs/biome": "2.2.6",
     "@commitlint/cli": "20.1.0",
     "@commitlint/config-conventional": "20.0.0",
-    "@tsconfig/bun": "1.0.8",
+    "@tsconfig/bun": "1.0.9",
     "@types/bun": "latest",
     "@types/node": "24.3.0",
     "typescript": "5.9.3"
