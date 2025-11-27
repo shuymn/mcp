@@ -1,8 +1,8 @@
-import { expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 
 import { type GroundingMetadata, type GroundingSource, processGroundingResponse } from "./gemini";
 
-test("processGroundingResponse", () => {
+describe("processGroundingResponse", () => {
   test("returns original text when no grounding metadata", () => {
     const result = processGroundingResponse("Hello world", undefined, undefined);
     expect(result).toBe("Hello world");
