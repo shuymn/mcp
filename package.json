@@ -13,7 +13,7 @@
     "@ai-sdk/google": "2.0.44",
     "@ai-sdk/google-vertex": "3.0.85",
     "@ai-sdk/openai": "2.0.76",
-    "@modelcontextprotocol/sdk": "1.23.0",
+    "@modelcontextprotocol/sdk": "1.24.1",
     "ai": "5.0.106",
     "zod": "3.25.76"
   },
