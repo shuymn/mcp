@@ -6,7 +6,7 @@
       "name": "mcp-servers",
       "dependencies": {
         "@ai-sdk/google": "2.0.44",
-        "@ai-sdk/google-vertex": "3.0.85",
+        "@ai-sdk/google-vertex": "3.0.86",
         "@ai-sdk/openai": "2.0.76",
         "@modelcontextprotocol/sdk": "1.24.1",
         "ai": "5.0.106",
@@ -30,7 +30,7 @@
 
     "@ai-sdk/google": ["@ai-sdk/google@2.0.44", "", { "dependencies": { "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.18" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-c5dck36FjqiVoeeMJQLTEmUheoURcGTU/nBT6iJu8/nZiKFT/y8pD85KMDRB7RerRYaaQOtslR2d6/5PditiRw=="],
 
-    "@ai-sdk/google-vertex": ["@ai-sdk/google-vertex@3.0.85", "", { "dependencies": { "@ai-sdk/anthropic": "2.0.53", "@ai-sdk/google": "2.0.44", "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.18", "google-auth-library": "^10.5.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-FOoPNdkXp3QE9F93HKD11YdS+ONNijacOH80bNKZSAFNIcxSQ+0UOW46b9OxCV576SP2DAuU1FSD4z6hhhMkrg=="],
+    "@ai-sdk/google-vertex": ["@ai-sdk/google-vertex@3.0.86", "", { "dependencies": { "@ai-sdk/anthropic": "2.0.53", "@ai-sdk/google": "2.0.44", "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.18", "google-auth-library": "^10.5.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-rdXVXURmmb8A6ma8aud0xqVujbZ9E7Gt68xj6sMw9erZ+HXpBZHJRcx+LYuoLvLoWw9bSLwQJ0QbaXFM68xG4g=="],
 
     "@ai-sdk/openai": ["@ai-sdk/openai@2.0.76", "", { "dependencies": { "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.18" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-ryUkhTDVxe3D1GSAGc94vPZsJlSY8ZuBDLkpf4L81Dm7Ik5AgLfhQrZa8+0hD4kp0dxdVaIoxhpa3QOt1CmncA=="],
 
