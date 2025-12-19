@@ -14,7 +14,7 @@
     "@ai-sdk/google-vertex": "3.0.92",
     "@ai-sdk/openai": "2.0.87",
     "@modelcontextprotocol/sdk": "1.24.3",
-    "ai": "5.0.113",
+    "ai": "5.0.114",
     "zod": "3.25.76"
   },
   "devDependencies": {
