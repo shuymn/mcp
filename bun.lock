@@ -5,8 +5,8 @@
     "": {
       "name": "mcp-servers",
       "dependencies": {
-        "@ai-sdk/google": "2.0.48",
-        "@ai-sdk/google-vertex": "3.0.93",
+        "@ai-sdk/google": "2.0.49",
+        "@ai-sdk/google-vertex": "3.0.94",
         "@ai-sdk/openai": "2.0.88",
         "@modelcontextprotocol/sdk": "1.25.1",
         "ai": "5.0.115",
@@ -28,9 +28,9 @@
 
     "@ai-sdk/gateway": ["@ai-sdk/gateway@2.0.22", "", { "dependencies": { "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.19", "@vercel/oidc": "3.0.5" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-6fHjDfCbjfj4vyMExuLei7ir2///E5sNwNZaobdJsJIxJjDSsjzSLGO/aUI7p9eOnB8XctDrDSF5ilwDGpi6eg=="],
 
-    "@ai-sdk/google": ["@ai-sdk/google@2.0.48", "", { "dependencies": { "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.19" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-LMzyYEG+RshL13EzQZPvpSuS56Vhm5raC3LGcTwCOQDu4XQycphKT2xrYmzt0odMR+fMka8Sbk/kHA1DcJnu6A=="],
+    "@ai-sdk/google": ["@ai-sdk/google@2.0.49", "", { "dependencies": { "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.19" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-efwKk4mOV0SpumUaQskeYABk37FJPmEYwoDJQEjyLRmGSjtHRe9P5Cwof5ffLvaFav2IaJpBGEz98pyTs7oNWA=="],
 
-    "@ai-sdk/google-vertex": ["@ai-sdk/google-vertex@3.0.93", "", { "dependencies": { "@ai-sdk/anthropic": "2.0.56", "@ai-sdk/google": "2.0.48", "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.19", "google-auth-library": "^10.5.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-qgipgXzBMjZ8ivWSnM03vLNL5NwrwB7ejl6+VuVo6SxHIO3H/ATC3EUMWNaDDDnJbR0V8x+Cx1qIbwpXgjw7sQ=="],
+    "@ai-sdk/google-vertex": ["@ai-sdk/google-vertex@3.0.94", "", { "dependencies": { "@ai-sdk/anthropic": "2.0.56", "@ai-sdk/google": "2.0.49", "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.19", "google-auth-library": "^10.5.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-zBIYxox2Jdudjtj1lSZ5cQbCuCMtRwUfguEv7+pVGqQqlbKzT9puyr8lzNLrdHsPBgQctzQr9Yqa6tar1r2yag=="],
 
     "@ai-sdk/openai": ["@ai-sdk/openai@2.0.88", "", { "dependencies": { "@ai-sdk/provider": "2.0.0", "@ai-sdk/provider-utils": "3.0.19" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-LlOf83haeZIiRUH1Zw1oEmqUfw5y54227CvndFoBpIkMJwQDGAB3VARUeOJ6iwAWDJjXSz06GdnEnhRU67Yatw=="],
 
