@@ -12,7 +12,7 @@
   "dependencies": {
     "@ai-sdk/google": "3.0.29",
     "@ai-sdk/google-vertex": "4.0.59",
-    "@ai-sdk/openai": "3.0.29",
+    "@ai-sdk/openai": "3.0.30",
     "@modelcontextprotocol/sdk": "1.26.0",
     "ai": "6.0.91",
     "zod": "3.25.76"
