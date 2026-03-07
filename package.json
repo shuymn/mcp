@@ -19,8 +19,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.2",
-    "@commitlint/cli": "20.4.1",
-    "@commitlint/config-conventional": "20.4.1",
+    "@commitlint/cli": "20.4.3",
+    "@commitlint/config-conventional": "20.4.3",
     "@tsconfig/bun": "1.0.10",
     "@types/bun": "latest",
     "@types/node": "25.3.0",
