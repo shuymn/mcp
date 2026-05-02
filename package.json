@@ -10,11 +10,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/google": "3.0.64",
-    "@ai-sdk/google-vertex": "4.0.112",
-    "@ai-sdk/openai": "3.0.53",
+    "@ai-sdk/google": "3.0.65",
+    "@ai-sdk/google-vertex": "4.0.113",
+    "@ai-sdk/openai": "3.0.54",
     "@modelcontextprotocol/sdk": "1.29.0",
-    "ai": "6.0.168",
+    "ai": "6.0.169",
     "zod": "3.25.76"
   },
   "devDependencies": {
